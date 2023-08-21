@@ -4984,3 +4984,14 @@ Alternately, you can install this by running `pip install pycaret[models]`
 2023-08-18 15:11:46,072:WARNING:C:\Users\user\Documents\GitHub\Electro-Pi\AutoML app\app.py:9: DtypeWarning: Columns (7,8,18,25) have mixed types. Specify dtype option on import or set low_memory=False.
   df = pd.read_csv('dataset.csv', index_col=None)
 
+2023-08-20 14:29:17,783:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2023-08-20 14:29:17,784:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2023-08-20 14:29:17,784:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2023-08-20 14:29:17,784:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2023-08-20 14:29:18,193:WARNING:C:\Users\user\Documents\GitHub\Electro-Pi\AutoML app\app.py:9: DtypeWarning: Columns (7,8,18,25) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv('dataset.csv', index_col=None)
+
