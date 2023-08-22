@@ -152,14 +152,15 @@ if choice == "Perform modeling":
     st.title('It is time for Machine Learning modeling')
     df = pd.read_csv('dataset.csv', index_col=None)
 
-    modeling_choise = st.selectbox('Do you want Auto modeling or you want to choose the model ?',['Auto modeling','Choose model'])
-
-
     target = st.selectbox('Choose your target variable', df.columns)
     X = df.drop(columns=target)
     y = df[target]
     st.write('Your Features are', X)
     st.write('Your Target is', y)
+
+    modeling_choise = st.selectbox('Do you want Auto modeling or you want to choose the model ?',['Auto modeling','Choose model'])
+
+
 
     test_size = st.select_slider('Pick the test size you want', range(1, 100, 1))
     st.warning('It is recommended to pick a number between 10 and 30 ')
