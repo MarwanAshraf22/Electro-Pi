@@ -444,7 +444,7 @@ if choice == "Perform modeling":
 
 
             try :
-                
+
                 model_filename = "rg.pkl"
                 with open(model_filename, "wb") as model_file:
                     pickle.dump(rg, model_file)
