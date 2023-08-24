@@ -1,3 +1,6 @@
+# First of All I tried to get a shareable link to use it, but it kept getting errors so to run this app type stremlit run app.py
+
+
 import numpy as np
 import pandas as pd
 import streamlit as st
