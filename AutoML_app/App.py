@@ -1,4 +1,4 @@
-# First of All I tried to get a shareable link to use it, but it kept getting errors so to run this app type streamlit run app.py
+# App Link : https://electro-pi-automl.streamlit.app/
 
 
 import numpy as np
