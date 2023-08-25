@@ -21,7 +21,7 @@ with st.sidebar:
 
     st.image("https://h2o.ai/platform/h2o-automl/_jcr_content/root/container/section_1366565710/par/advancedcolumncontro/columns0/image.coreimg.png/1678211341158/h2o-automl.png")
     st.title("AutoML project")
-    st.info("This project is used to automat the process of EDA and ML modeling just upload your data and wait for the results")
+    st.info("This project powered by electropi.ai Upload your data and choose type your EDA and Prepare your data for ML modeling")
     choice = st.radio("Choose the Desired operation", ["Upload your data","Perform EDA",'Data Preparing',"Perform modeling"])
 
 
