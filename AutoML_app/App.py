@@ -140,9 +140,11 @@ if choice == "Data Preparing" :
     if want_to_drop == 'Yes':
 
         columns_to_drop = st.multiselect('Select columns to drop', df.columns)
-        df = df.drop(columns_to_drop, axis=1)
-        st.success('Columns dropped successfully.')
-        st.dataframe(df)
+        if columns_to_drop  :
+            df = df.drop(columns_to_drop, axis=1)
+            st.success('Columns dropped successfully.')
+            st.dataframe(df)
+
 
     encoder_option = st.selectbox('Do you want to encode your data ?',['','Yes','No'])
 
@@ -232,18 +234,24 @@ if choice == "Perform modeling":
     st.title('It is time for Machine Learning modeling')
     df = pd.read_csv('dataset.csv', index_col=None)
 
-    target = st.selectbox('Choose your target variable', df.columns)
-    X = df.drop(columns=target)
-    y = df[target]
-    st.write('Your Features are', X)
-    st.write('Your Target is', y)
+    target_choices = [''] + df.columns.tolist()
 
-    test_size = st.select_slider('Pick the test size you want', range(1, 100, 1))
-    st.warning('It is recommended to pick a number between 10 and 30 ')
-    test_size_fraction = test_size / 100.0
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_fraction, random_state=42)
-    st.write('Shape of training data is :', X_train.shape)
-    st.write('Shape of testing data is :', X_test.shape)
+    try :
+        target = st.selectbox('Choose your target variable', target_choices)
+        X = df.drop(columns=target)
+        y = df[target]
+        st.write('Your Features are', X)
+        st.write('Your Target is', y)
+
+        test_size = st.select_slider('Pick the test size you want', range(1, 100, 1))
+        st.warning('It is recommended to pick a number between 10 and 30 ')
+        test_size_fraction = test_size / 100.0
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_fraction, random_state=42)
+        st.write('Shape of training data is :', X_train.shape)
+        st.write('Shape of testing data is :', X_test.shape)
+
+    except :
+        pass
 
     task_type = st.selectbox('Choose type of task you want to apply', ['','Classification', 'Regression'])
     modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
@@ -270,52 +278,55 @@ if choice == "Perform modeling":
                 with open('best_model.pkl', 'rb') as model_file:
                     st.download_button('Download the model', model_file, 'best_model.pkl')
 
+        try :
+            if modeling_choice == 'Manual modeling' :
 
-        if modeling_choice == 'Manual modeling' :
+                algo_type = st.selectbox('Please choose which type of algorithm you want to use',
+                                         ['','Logistic Regression','Decision Trees','Random Forest','SVC','KNN'])
 
-            algo_type = st.selectbox('Please choose which type of algorithm you want to use',
-                                     ['','Logistic Regression','Decision Trees','Random Forest','SVC','KNN'])
+                if algo_type == 'Logistic Regression' :
 
-            if algo_type == 'Logistic Regression' :
+                    from sklearn.linear_model import LogisticRegression
 
-                from sklearn.linear_model import LogisticRegression
-
-                clf = LogisticRegression(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
+                    clf = LogisticRegression(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
 
-            if algo_type == 'Decision Trees' :
+                if algo_type == 'Decision Trees' :
 
-                from sklearn.tree import DecisionTreeClassifier
+                    from sklearn.tree import DecisionTreeClassifier
 
-                clf = DecisionTreeClassifier(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
+                    clf = DecisionTreeClassifier(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            if algo_type == 'Random Forest' :
+                if algo_type == 'Random Forest' :
 
-                from sklearn.ensemble import RandomForestClassifier
+                    from sklearn.ensemble import RandomForestClassifier
 
-                clf = RandomForestClassifier(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
+                    clf = RandomForestClassifier(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            if algo_type == 'SVC' :
+                if algo_type == 'SVC' :
 
-                from sklearn.svm import SVC
+                    from sklearn.svm import SVC
 
-                clf = SVC(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
+                    clf = SVC(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            if algo_type == 'KNN' :
+                if algo_type == 'KNN' :
 
-                from sklearn.neighbors import KNeighborsClassifier
+                    from sklearn.neighbors import KNeighborsClassifier
 
-                clf = KNeighborsClassifier()
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
+                    clf = KNeighborsClassifier()
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
+
+        except :
+            st.warning('Please choose a valid binary or multivalued target for your classification problem')
 
             evaluation_type = st.selectbox('Choose type of evaluation metrics ',['','Accuracy','Confusion Matrix',
                                                                                  'Precision, Recall, and F1-score'])
