@@ -214,6 +214,7 @@ if choice == "Data Preparing" :
 
         st.write('OK, Please processed to next step')
         st.dataframe(df)
+        df = df.to_csv('dataset.csv', index=None)
 
     if scaling_option == 'Yes' :
 
@@ -328,49 +329,49 @@ if choice == "Perform modeling":
         except :
             st.warning('Please choose a valid binary or multivalued target for your classification problem')
 
-            evaluation_type = st.selectbox('Choose type of evaluation metrics ',['','Accuracy','Confusion Matrix',
-                                                                                 'Precision, Recall, and F1-score'])
+        evaluation_type = st.selectbox('Choose type of evaluation metrics ',['','Accuracy','Confusion Matrix',
+                                                                             'Precision, Recall, and F1-score'])
 
-            if evaluation_type == 'Accuracy' :
+        if evaluation_type == 'Accuracy' :
 
-                from sklearn.metrics import accuracy_score
+            from sklearn.metrics import accuracy_score
 
-                accuracy = accuracy_score(y_test, y_pred)
-                st.write("Accuracy:", accuracy)
+            accuracy = accuracy_score(y_test, y_pred)
+            st.write("Accuracy:", accuracy)
 
-            if evaluation_type == 'Confusion Matrix' :
+        if evaluation_type == 'Confusion Matrix' :
 
-                from sklearn.metrics import confusion_matrix
+            from sklearn.metrics import confusion_matrix
 
-                cm = confusion_matrix(y_test, y_pred)
-                st.write("Confusion Matrix:")
-                st.dataframe(cm)
+            cm = confusion_matrix(y_test, y_pred)
+            st.write("Confusion Matrix:")
+            st.dataframe(cm)
 
-            if evaluation_type == 'Precision, Recall, and F1-score' :
+        if evaluation_type == 'Precision, Recall, and F1-score' :
 
-                from sklearn.metrics import precision_score, recall_score, f1_score
+            from sklearn.metrics import precision_score, recall_score, f1_score
 
-                precision = precision_score(y_test, y_pred)
-                recall = recall_score(y_test, y_pred)
-                f1 = f1_score(y_test, y_pred)
-                metrics_dict = {
-                    "Metric": ["Precision", "Recall", "F1-Score"],
-                    "Value": [precision, recall, f1]
-                }
-                metrics_df = pd.DataFrame(metrics_dict)
-                st.dataframe(metrics_df)
+            precision = precision_score(y_test, y_pred)
+            recall = recall_score(y_test, y_pred)
+            f1 = f1_score(y_test, y_pred)
+            metrics_dict = {
+                "Metric": ["Precision", "Recall", "F1-Score"],
+                "Value": [precision, recall, f1]
+            }
+            metrics_df = pd.DataFrame(metrics_dict)
+            st.dataframe(metrics_df)
 
 
-            try :
+        try :
 
-                model_filename = "clf.pkl"
-                with open(model_filename, "wb") as model_file:
-                    pickle.dump(clf, model_file)
+            model_filename = "clf.pkl"
+            with open(model_filename, "wb") as model_file:
+                pickle.dump(clf, model_file)
 
-                st.download_button('Download the model', open(model_filename, 'rb').read(), 'clf.pkl')
+            st.download_button('Download the model', open(model_filename, 'rb').read(), 'clf.pkl')
 
-            except :
-                pass
+        except :
+            pass
 
     if task_type == 'Regression':
 
