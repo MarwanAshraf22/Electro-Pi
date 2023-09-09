@@ -7,7 +7,6 @@ import pandas as pd
 import streamlit as st
 from pytesseract import Output
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 with st.sidebar:
     st.title("National ID Card Recognition")
