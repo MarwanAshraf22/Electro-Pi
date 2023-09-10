@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e10cc3b-adf4-4312-9520-6070e9c2a240" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/trial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.py" beforeDir="false" afterPath="$PROJECT_DIR$/App.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Studying/Computer vision foundation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../Studying/Computer vision foundation.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clf.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/clf.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset.csv" beforeDir="false" afterPath="$PROJECT_DIR$/dataset.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs.log" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +50,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/Documents/GitHub/Electro-Pi/AutoML_app/App.py&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>

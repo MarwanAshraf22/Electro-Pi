@@ -22,7 +22,7 @@ with st.sidebar:
     st.image("https://h2o.ai/platform/h2o-automl/_jcr_content/root/container/section_1366565710/par/advancedcolumncontro/columns0/image.coreimg.png/1678211341158/h2o-automl.png")
     st.title("AutoML project")
     st.info("This project powered by electropi.ai Upload your data and choose type your EDA and Prepare your data for ML modeling")
-    choice = st.radio("Choose the Desired operation", ["Upload your data","Perform EDA",'Data Preparing',"Perform modeling"])
+    choice = st.radio("Choose the Desired operation", ["Upload your data","Perform EDA",'Data Preparing and Modeling','model'])
 
 
 if choice == "Upload your data":
@@ -126,7 +126,7 @@ if choice == "Perform EDA":
 
 
 
-if choice == "Data Preparing" :
+if choice == "Data Preparing and Modeling" :
 
     st.title('Preparing the data before machine learning modeling')
 
@@ -146,98 +146,15 @@ if choice == "Data Preparing" :
             st.dataframe(df)
 
 
-    encoder_option = st.selectbox('Do you want to encode your data ?',['','Yes','No'])
-
-    if encoder_option == 'No' :
-
-        st.write('OK, Please processed to next step')
-
-    if encoder_option == 'Yes' :
-
-        encoder_columns = st.multiselect('Please pick the columns you want to encode',df.columns)
-        encoder_type = st.selectbox('Please pick the type of encoder you want to use', ['','Label Encoder','One Hot Encoder'])
-
-        if encoder_type == 'Label Encoder' :
-
-            encoder = LabelEncoder()
-            df[encoder_columns] = df[encoder_columns].apply(encoder.fit_transform)
-            st.success('Columns encoded successfully.')
-            st.dataframe(df)
-
-        if encoder_type == 'One Hot Encoder':
-
-            df = pd.get_dummies(df, columns=encoder_columns, prefix=encoder_columns,drop_first=True)
-            st.success('Columns encoded successfully.')
-            st.dataframe(df)
 
 
-    fill_option = st.selectbox('Is there any missing data you want to fill ?', ['', 'Yes', 'No'])
 
-    if fill_option == 'No':
 
-        st.write('OK, Please processed to next step')
-
-    if fill_option == 'Yes':
-
-        encoder_columns = st.multiselect('Please pick the columns you want to fill', df.columns)
-        encoder_type = st.selectbox('Please pick the type of filling you want to use', ['','Mean','Median','Most frequent'])
-
-        try:
-
-            if encoder_type == 'Mean' :
-
-                imputer = SimpleImputer(strategy='mean')
-                df[encoder_columns] = np.round(imputer.fit_transform(df[encoder_columns]),1)
-                st.success('Selected columns filled successfully')
-                st.dataframe(df)
-
-            if encoder_type == 'Median' :
-
-                imputer = SimpleImputer(strategy='median')
-                df[encoder_columns] = np.round(imputer.fit_transform(df[encoder_columns]),1)
-                st.success('Selected columns filled successfully')
-                st.dataframe(df)
-
-            if encoder_type == 'Most frequent' :
-
-                imputer = SimpleImputer(strategy='most_frequent')
-                df[encoder_columns] = np.round(imputer.fit_transform(df[encoder_columns]),1)
-                st.success('Selected columns filled successfully')
-                st.dataframe(df)
-
-        except :
-            pass
-
-    scaling_option = st.selectbox('Do you want to scale your data ?',['','Yes','No'])
-
-    if scaling_option == 'No' :
-
-        st.write('OK, Please processed to next step')
-        st.dataframe(df)
-        df = df.to_csv('dataset.csv', index=None)
-
-    if scaling_option == 'Yes' :
-
-        scaler = MinMaxScaler()
-        df_scaled = scaler.fit_transform(df)
-        df_scaled = pd.DataFrame(df_scaled, columns=df.columns)
-        st.success('The Data Frame has been successfully scaled')
-        st.dataframe(df_scaled)
-
-        try :
-
-            df = df_scaled.to_csv('dataset.csv', index=None)
-        except :
-            pass
-
-if choice == "Perform modeling":
-
-    st.title('It is time for Machine Learning modeling')
-    df = pd.read_csv('dataset.csv', index_col=None)
+if choice=='model'  :
 
     target_choices = [''] + df.columns.tolist()
 
-    try :
+    try:
         target = st.selectbox('Choose your target variable', target_choices)
         X = df.drop(columns=target)
         y = df[target]
@@ -254,126 +171,135 @@ if choice == "Perform modeling":
     except :
         pass
 
-    task_type = st.selectbox('Choose type of task you want to apply', ['','Classification', 'Regression'])
-    modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
-                                   ['','Auto modeling','Manual modeling'])
+    # if st.button('Start Modelling') :
 
-    if task_type == 'Classification':
+    categorical_columns = df.select_dtypes(include=['object', 'category'])
+    one_hot_encoded = pd.get_dummies(categorical_columns,drop_first=True)
+    df_encoded = pd.concat([df, one_hot_encoded], axis=1)
+    columns_to_drop = categorical_columns
+    df_encoded = df_encoded.drop(columns=columns_to_drop)
+    st.write('Your data after encoding',df_encoded)
+
+    from sklearn.preprocessing import MinMaxScaler
+    mm = MinMaxScaler()
+    scaled_data = mm.fit_transform(df_encoded)
+    df_scaled = pd.DataFrame(scaled_data, columns=df_encoded.columns)
+    st.write('your data after scaling',df_scaled)
+
+    if y.dtype == 'object' or y.nunique()<= 10:
+        st.info('This is a classification problem')
+        modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
+                                       ['', 'Auto modeling', 'Manual modeling'])
 
         if modeling_choice == 'Auto modeling':
 
             from pycaret.classification import *
+            import xgboost
 
-            if st.button('Run Modelling'):
+            setup(df, target=target, verbose=False)
+            setup_df = pull()
+            st.info("This is the ML experiment settings")
+            st.dataframe(setup_df)
+            best_model = compare_models()
+            compare_df = pull()
+            st.info("This is your ML model")
+            st.dataframe(compare_df)
+            save_model(best_model, 'best_model')
 
-                setup(df, target=target, verbose=False)
-                setup_df = pull()
-                st.info("This is the ML experiment settings")
-                st.dataframe(setup_df)
-                best_model = compare_models()
-                compare_df = pull()
-                st.info("This is your ML model")
-                st.dataframe(compare_df)
-                save_model(best_model, 'best_model')
+            with open('best_model.pkl', 'rb') as model_file:
+                st.download_button('Download the model', model_file, 'best_model.pkl')
 
-                with open('best_model.pkl', 'rb') as model_file:
-                    st.download_button('Download the model', model_file, 'best_model.pkl')
+        if modeling_choice == 'Manual modeling':
 
-        try :
-            if modeling_choice == 'Manual modeling' :
+            algo_type = st.selectbox('Please choose which type of algorithm you want to use',
+                                     ['', 'Logistic Regression', 'Decision Trees', 'Random Forest', 'SVC',
+                                      'KNN'])
 
-                algo_type = st.selectbox('Please choose which type of algorithm you want to use',
-                                         ['','Logistic Regression','Decision Trees','Random Forest','SVC','KNN'])
+            if algo_type == 'Logistic Regression':
+                from sklearn.linear_model import LogisticRegression
 
-                if algo_type == 'Logistic Regression' :
+                clf = LogisticRegression(random_state=42)
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
 
-                    from sklearn.linear_model import LogisticRegression
+            if algo_type == 'Decision Trees':
+                from sklearn.tree import DecisionTreeClassifier
 
-                    clf = LogisticRegression(random_state=42)
-                    clf.fit(X_train, y_train)
-                    y_pred = clf.predict(X_test)
+                clf = DecisionTreeClassifier(random_state=42)
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
 
+            if algo_type == 'Random Forest':
+                from sklearn.ensemble import RandomForestClassifier
 
-                if algo_type == 'Decision Trees' :
+                clf = RandomForestClassifier(random_state=42)
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
 
-                    from sklearn.tree import DecisionTreeClassifier
+            if algo_type == 'SVC':
+                from sklearn.svm import SVC
 
-                    clf = DecisionTreeClassifier(random_state=42)
-                    clf.fit(X_train, y_train)
-                    y_pred = clf.predict(X_test)
+                clf = SVC(random_state=42)
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
 
-                if algo_type == 'Random Forest' :
+            if algo_type == 'KNN':
+                from sklearn.neighbors import KNeighborsClassifier
 
-                    from sklearn.ensemble import RandomForestClassifier
-
-                    clf = RandomForestClassifier(random_state=42)
-                    clf.fit(X_train, y_train)
-                    y_pred = clf.predict(X_test)
-
-                if algo_type == 'SVC' :
-
-                    from sklearn.svm import SVC
-
-                    clf = SVC(random_state=42)
-                    clf.fit(X_train, y_train)
-                    y_pred = clf.predict(X_test)
-
-                if algo_type == 'KNN' :
-
-                    from sklearn.neighbors import KNeighborsClassifier
-
-                    clf = KNeighborsClassifier()
-                    clf.fit(X_train, y_train)
-                    y_pred = clf.predict(X_test)
-
-        except :
-            st.warning('Please choose a valid binary or multivalued target for your classification problem')
-
-        evaluation_type = st.selectbox('Choose type of evaluation metrics ',['','Accuracy','Confusion Matrix',
-                                                                             'Precision, Recall, and F1-score'])
-
-        if evaluation_type == 'Accuracy' :
-
-            from sklearn.metrics import accuracy_score
-
-            accuracy = accuracy_score(y_test, y_pred)
-            st.write("Accuracy:", accuracy)
-
-        if evaluation_type == 'Confusion Matrix' :
-
-            from sklearn.metrics import confusion_matrix
-
-            cm = confusion_matrix(y_test, y_pred)
-            st.write("Confusion Matrix:")
-            st.dataframe(cm)
-
-        if evaluation_type == 'Precision, Recall, and F1-score' :
-
-            from sklearn.metrics import precision_score, recall_score, f1_score
-
-            precision = precision_score(y_test, y_pred)
-            recall = recall_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred)
-            metrics_dict = {
-                "Metric": ["Precision", "Recall", "F1-Score"],
-                "Value": [precision, recall, f1]
-            }
-            metrics_df = pd.DataFrame(metrics_dict)
-            st.dataframe(metrics_df)
+                clf = KNeighborsClassifier()
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
 
 
-        try :
 
-            model_filename = "clf.pkl"
-            with open(model_filename, "wb") as model_file:
-                pickle.dump(clf, model_file)
+            evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'Accuracy', 'Confusion Matrix',
+                                                                                  'Precision, Recall, and F1-score'])
 
-            st.download_button('Download the model', open(model_filename, 'rb').read(), 'clf.pkl')
+            if evaluation_type == 'Accuracy':
+                from sklearn.metrics import accuracy_score
 
-        except :
-            pass
+                accuracy = accuracy_score(y_test, y_pred)
+                st.write("Accuracy:", accuracy)
 
-    if task_type == 'Regression':
+            if evaluation_type == 'Confusion Matrix':
+                from sklearn.metrics import confusion_matrix
+
+                cm = confusion_matrix(y_test, y_pred)
+                st.write("Confusion Matrix:")
+                st.dataframe(cm)
+
+            if evaluation_type == 'Precision, Recall, and F1-score':
+                from sklearn.metrics import precision_score, recall_score, f1_score
+
+                precision = precision_score(y_test, y_pred, average='macro')
+                recall = recall_score(y_test, y_pred, average='macro')
+                f1 = f1_score(y_test, y_pred, average='macro')
+                metrics_dict = {
+                    "Metric": ["Precision", "Recall", "F1-Score"],
+                    "Value": [precision, recall, f1]
+                }
+                metrics_df = pd.DataFrame(metrics_dict)
+                st.dataframe(metrics_df)
+
+
+            try:
+
+                model_filename = "clf.pkl"
+                with open(model_filename, "wb") as model_file:
+                    pickle.dump(clf, model_file)
+
+                st.download_button('Download the model', open(model_filename, 'rb').read(), 'clf.pkl')
+
+            except:
+                pass
+
+
+
+    else :
+        st.info('This is a regression problem')
+        modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
+                                       ['', 'Auto modeling', 'Manual modeling'])
+
 
         if modeling_choice == 'Auto modeling':
 
