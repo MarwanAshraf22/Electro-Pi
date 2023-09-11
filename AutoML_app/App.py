@@ -187,10 +187,12 @@ if choice == "Data Preparing and Modeling" :
                 from pycaret.classification import *
 
                 if st.button('Run Modelling'):
+
                     setup(df, target=target, verbose=False)
                     setup_df = pull()
                     st.info("This is the ML experiment settings")
                     st.dataframe(setup_df)
+                    st.error('IT WILL TAKE SOME TMIE PLEASE BE PATIENT')
                     best_model = compare_models()
                     compare_df = pull()
                     st.info("This is your ML model")
@@ -297,6 +299,7 @@ if choice == "Data Preparing and Modeling" :
                     setup_df = pull()
                     st.info("This is the ML experiment settings")
                     st.dataframe(setup_df)
+                    st.error('IT WILL TAKE SOME TIME PLEASE BE PATIENT')
                     best_model = compare_models()
                     compare_df = pull()
                     st.info("This is your ML model")
