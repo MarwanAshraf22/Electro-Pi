@@ -185,7 +185,6 @@ if choice == "Data Preparing and Modeling" :
 
             if modeling_choice == 'Auto modeling':
                 from pycaret.classification import *
-                import xgboost
 
                 if st.button('Run Modelling'):
                     setup(df, target=target, verbose=False)
@@ -198,8 +197,8 @@ if choice == "Data Preparing and Modeling" :
                     st.dataframe(compare_df)
                     save_model(best_model, 'best_model')
 
-                with open('best_model.pkl', 'rb') as model_file:
-                    st.download_button('Download the model', model_file, 'best_model.pkl')
+                    with open('best_model.pkl', 'rb') as model_file:
+                        st.download_button('Download the model', model_file, 'best_model.pkl')
 
             if modeling_choice == 'Manual modeling':
 
