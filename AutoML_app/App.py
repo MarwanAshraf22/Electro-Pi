@@ -22,7 +22,7 @@ with st.sidebar:
     st.image("https://h2o.ai/platform/h2o-automl/_jcr_content/root/container/section_1366565710/par/advancedcolumncontro/columns0/image.coreimg.png/1678211341158/h2o-automl.png")
     st.title("AutoML project")
     st.info("This project powered by electropi.ai Upload your data and choose type your EDA and Prepare your data for ML modeling")
-    choice = st.radio("Choose the Desired operation", ["Upload your data","Perform EDA",'Data Preparing and Modeling','model'])
+    choice = st.radio("Choose the Desired operation", ["Upload your data","Perform EDA",'Data Preparing and Modeling'])
 
 
 if choice == "Upload your data":
@@ -145,19 +145,28 @@ if choice == "Data Preparing and Modeling" :
             st.success('Columns dropped successfully.')
             st.dataframe(df)
 
+    categorical_columns = df.select_dtypes(include=['object', 'category'])
+    one_hot_encoded = pd.get_dummies(categorical_columns, drop_first=True)
+    df_encoded = pd.concat([df, one_hot_encoded], axis=1)
+    columns_to_drop = categorical_columns
+    df_encoded = df_encoded.drop(columns=columns_to_drop)
+    st.write('Your data after encoding', df_encoded)
 
+    df_filled = df_encoded.fillna(df_encoded.median())
+    st.write('This is your data after filling missing values',df_filled)
 
+    from sklearn.preprocessing import MinMaxScaler
 
-
-
-if choice=='model'  :
-
-    target_choices = [''] + df.columns.tolist()
+    mm = MinMaxScaler()
+    scaled_data = mm.fit_transform(df_filled)
+    df_scaled = pd.DataFrame(scaled_data, columns=df_encoded.columns)
+    st.write('your data after scaling', df_scaled)
+    target_choices = [''] + df_scaled.columns.tolist()
 
     try:
         target = st.selectbox('Choose your target variable', target_choices)
-        X = df.drop(columns=target)
-        y = df[target]
+        X = df_scaled.drop(columns=target)
+        y = df_scaled[target]
         st.write('Your Features are', X)
         st.write('Your Target is', y)
 
@@ -168,31 +177,17 @@ if choice=='model'  :
         st.write('Shape of training data is :', X_train.shape)
         st.write('Shape of testing data is :', X_test.shape)
 
-    except :
+    except:
         pass
 
     # if st.button('Start Modelling') :
 
-    categorical_columns = df.select_dtypes(include=['object', 'category'])
-    one_hot_encoded = pd.get_dummies(categorical_columns,drop_first=True)
-    df_encoded = pd.concat([df, one_hot_encoded], axis=1)
-    columns_to_drop = categorical_columns
-    df_encoded = df_encoded.drop(columns=columns_to_drop)
-    st.write('Your data after encoding',df_encoded)
-
-    from sklearn.preprocessing import MinMaxScaler
-    mm = MinMaxScaler()
-    scaled_data = mm.fit_transform(df_encoded)
-    df_scaled = pd.DataFrame(scaled_data, columns=df_encoded.columns)
-    st.write('your data after scaling',df_scaled)
-
-    if y.dtype == 'object' or y.nunique()<= 10:
+    if y.dtype == 'object' or y.nunique() <= 10:
         st.info('This is a classification problem')
         modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
                                        ['', 'Auto modeling', 'Manual modeling'])
 
         if modeling_choice == 'Auto modeling':
-
             from pycaret.classification import *
             import xgboost
 
@@ -250,8 +245,6 @@ if choice=='model'  :
                 clf.fit(X_train, y_train)
                 y_pred = clf.predict(X_test)
 
-
-
             evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'Accuracy', 'Confusion Matrix',
                                                                                   'Precision, Recall, and F1-score'])
 
@@ -281,7 +274,6 @@ if choice=='model'  :
                 metrics_df = pd.DataFrame(metrics_dict)
                 st.dataframe(metrics_df)
 
-
             try:
 
                 model_filename = "clf.pkl"
@@ -295,18 +287,16 @@ if choice=='model'  :
 
 
 
-    else :
+    else:
         st.info('This is a regression problem')
         modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
                                        ['', 'Auto modeling', 'Manual modeling'])
-
 
         if modeling_choice == 'Auto modeling':
 
             from pycaret.regression import *
 
             if st.button('Run Modelling'):
-
                 setup(df, target=target, verbose=False)
                 setup_df = pull()
                 st.info("This is the ML experiment settings")
@@ -320,71 +310,60 @@ if choice=='model'  :
                 with open('best_model.pkl', 'rb') as model_file:
                     st.download_button('Download the model', model_file, 'best_model.pkl')
 
-
-        if modeling_choice == 'Manual modeling' :
+        if modeling_choice == 'Manual modeling':
 
             algo_type = st.selectbox('Please choose which type of algorithm you want to use',
-                                     ['','Linear Regression','Ridge','SVR','Random Forest'])
+                                     ['', 'Linear Regression', 'Ridge', 'SVR', 'Random Forest'])
 
-            if algo_type == 'Linear Regression' :
-
+            if algo_type == 'Linear Regression':
                 from sklearn.linear_model import LinearRegression
 
                 rg = LinearRegression()
                 rg.fit(X_train, y_train)
                 y_pred = rg.predict(X_test)
 
-
-            if algo_type == 'Ridge' :
-
+            if algo_type == 'Ridge':
                 from sklearn.linear_model import Ridge
 
                 rg = Ridge()
                 rg.fit(X_train, y_train)
                 y_pred = rg.predict(X_test)
 
-
-            if algo_type == 'SVR' :
-
+            if algo_type == 'SVR':
                 from sklearn.svm import SVR
 
                 rg = SVR()
                 rg.fit(X_train, y_train)
                 y_pred = rg.predict(X_test)
 
-            if algo_type == 'Random Forest' :
-
+            if algo_type == 'Random Forest':
                 from sklearn.ensemble import RandomForestRegressor
 
                 rg = RandomForestRegressor()
                 rg.fit(X_train, y_train)
                 y_pred = rg.predict(X_test)
 
-            evaluation_type = st.selectbox('Choose type of evaluation metrics ',['','MAE','MSE','r2 score'])
+            evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'MAE', 'MSE', 'r2 score'])
 
-            if evaluation_type == 'MAE' :
-
+            if evaluation_type == 'MAE':
                 from sklearn.metrics import mean_absolute_error
 
                 MAE = mean_absolute_error(y_test, y_pred)
                 st.write("Mean absolute error:", MAE)
 
-            if evaluation_type == 'MSE' :
-
+            if evaluation_type == 'MSE':
                 from sklearn.metrics import mean_squared_error
 
                 MSE = mean_squared_error(y_test, y_pred)
                 st.write("Mean squared error:", MSE)
 
-            if evaluation_type == 'r2 score' :
-
+            if evaluation_type == 'r2 score':
                 from sklearn.metrics import r2_score
 
                 r2 = r2_score(y_test, y_pred)
                 st.write("r2 score:", r2)
 
-
-            try :
+            try:
 
                 model_filename = "rg.pkl"
                 with open(model_filename, "wb") as model_file:
@@ -392,8 +371,16 @@ if choice=='model'  :
 
                 st.download_button('Download the model', open(model_filename, 'rb').read(), 'rg.pkl')
 
-            except :
+            except:
                 pass
+
+
+
+
+
+
+
+
 
 
 
