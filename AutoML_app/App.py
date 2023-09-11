@@ -156,7 +156,15 @@ if choice == "Data Preparing and Modeling" :
     columns_to_drop = categorical_columns
     df_encoded = df_encoded.drop(columns=columns_to_drop)
 
-    df_filled = df_encoded.fillna(df_encoded.median())
+    fill_missing = st.selectbox('How would you like to handle your missing data ?',['','Mean','Median','Mode'])
+    if fill_missing == 'Mean' :
+        df_filled = df_encoded.fillna(df_encoded.mean())
+
+    if fill_missing == 'Median' :
+        df_filled = df_encoded.fillna(df_encoded.median())
+
+    if fill_missing == 'Mode' :
+        df_filled = df_encoded.fillna(df_encoded.mode().iloc[0])
 
     from sklearn.preprocessing import MinMaxScaler
     try:
