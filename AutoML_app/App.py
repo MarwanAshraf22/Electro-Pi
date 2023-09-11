@@ -293,7 +293,7 @@ if choice == "Data Preparing and Modeling" :
                 from pycaret.regression import *
 
                 if st.button('Run Modelling'):
-                    setup(df, target=target, verbose=False,use_gpu=True)
+                    setup(df, target=target, verbose=False)
                     setup_df = pull()
                     st.info("This is the ML experiment settings")
                     st.dataframe(setup_df)
