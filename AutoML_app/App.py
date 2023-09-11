@@ -192,7 +192,7 @@ if choice == "Data Preparing and Modeling" :
                     st.info("This is the ML experiment settings")
                     st.dataframe(setup_df)
                     st.error('IT WILL TAKE TWO MINUTES PLEASE BE PATIENT')
-                    best_model = compare_models()
+                    best_model = compare_models(include=['lr','dt','rf','knn','nb'])
                     compare_df = pull()
                     st.info("This is your ML model")
                     st.dataframe(compare_df)
