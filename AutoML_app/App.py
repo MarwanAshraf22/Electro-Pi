@@ -145,158 +145,48 @@ if choice == "Data Preparing and Modeling" :
             st.success('Columns dropped successfully.')
             st.dataframe(df)
 
+    target_choices = [''] + df.columns.tolist()
+    target = st.selectbox('Choose your target variable', target_choices)
+
     categorical_columns = df.select_dtypes(include=['object', 'category'])
+    categorical_columns = [col for col in categorical_columns if col != target]
+
     one_hot_encoded = pd.get_dummies(categorical_columns, drop_first=True)
     df_encoded = pd.concat([df, one_hot_encoded], axis=1)
     columns_to_drop = categorical_columns
     df_encoded = df_encoded.drop(columns=columns_to_drop)
-    st.write('Your data after encoding', df_encoded)
 
     df_filled = df_encoded.fillna(df_encoded.median())
-    st.write('This is your data after filling missing values',df_filled)
 
     from sklearn.preprocessing import MinMaxScaler
-
-    mm = MinMaxScaler()
-    scaled_data = mm.fit_transform(df_filled)
-    df_scaled = pd.DataFrame(scaled_data, columns=df_encoded.columns)
-    st.write('your data after scaling', df_scaled)
-    target_choices = [''] + df_scaled.columns.tolist()
-
     try:
-        target = st.selectbox('Choose your target variable', target_choices)
-        X = df_scaled.drop(columns=target)
-        y = df_scaled[target]
+        X = df_filled.drop(columns=target)
+        y = df_filled[target]
         st.write('Your Features are', X)
         st.write('Your Target is', y)
 
-        test_size = st.select_slider('Pick the test size you want', range(1, 100, 1))
-        st.warning('It is recommended to pick a number between 10 and 30 ')
-        test_size_fraction = test_size / 100.0
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_fraction, random_state=42)
-        st.write('Shape of training data is :', X_train.shape)
-        st.write('Shape of testing data is :', X_test.shape)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        mm = MinMaxScaler()
+        scaled_data = mm.fit_transform(X)
+        df_scaled = pd.DataFrame(scaled_data, columns=X.columns)
+        df_scaled['target'] = y
+        st.write('your data after preprocessing', df_scaled)
 
     except:
         pass
 
-    # if st.button('Start Modelling') :
-
-    if y.dtype == 'object' or y.nunique() <= 10:
-        st.info('This is a classification problem')
-        modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
-                                       ['', 'Auto modeling', 'Manual modeling'])
-
-        if modeling_choice == 'Auto modeling':
-            from pycaret.classification import *
-            import xgboost
-
-            setup(df, target=target, verbose=False)
-            setup_df = pull()
-            st.info("This is the ML experiment settings")
-            st.dataframe(setup_df)
-            best_model = compare_models()
-            compare_df = pull()
-            st.info("This is your ML model")
-            st.dataframe(compare_df)
-            save_model(best_model, 'best_model')
-
-            with open('best_model.pkl', 'rb') as model_file:
-                st.download_button('Download the model', model_file, 'best_model.pkl')
-
-        if modeling_choice == 'Manual modeling':
-
-            algo_type = st.selectbox('Please choose which type of algorithm you want to use',
-                                     ['', 'Logistic Regression', 'Decision Trees', 'Random Forest', 'SVC',
-                                      'KNN'])
-
-            if algo_type == 'Logistic Regression':
-                from sklearn.linear_model import LogisticRegression
-
-                clf = LogisticRegression(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
-
-            if algo_type == 'Decision Trees':
-                from sklearn.tree import DecisionTreeClassifier
-
-                clf = DecisionTreeClassifier(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
-
-            if algo_type == 'Random Forest':
-                from sklearn.ensemble import RandomForestClassifier
-
-                clf = RandomForestClassifier(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
-
-            if algo_type == 'SVC':
-                from sklearn.svm import SVC
-
-                clf = SVC(random_state=42)
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
-
-            if algo_type == 'KNN':
-                from sklearn.neighbors import KNeighborsClassifier
-
-                clf = KNeighborsClassifier()
-                clf.fit(X_train, y_train)
-                y_pred = clf.predict(X_test)
-
-            evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'Accuracy', 'Confusion Matrix',
-                                                                                  'Precision, Recall, and F1-score'])
-
-            if evaluation_type == 'Accuracy':
-                from sklearn.metrics import accuracy_score
-
-                accuracy = accuracy_score(y_test, y_pred)
-                st.write("Accuracy:", accuracy)
-
-            if evaluation_type == 'Confusion Matrix':
-                from sklearn.metrics import confusion_matrix
-
-                cm = confusion_matrix(y_test, y_pred)
-                st.write("Confusion Matrix:")
-                st.dataframe(cm)
-
-            if evaluation_type == 'Precision, Recall, and F1-score':
-                from sklearn.metrics import precision_score, recall_score, f1_score
-
-                precision = precision_score(y_test, y_pred, average='macro')
-                recall = recall_score(y_test, y_pred, average='macro')
-                f1 = f1_score(y_test, y_pred, average='macro')
-                metrics_dict = {
-                    "Metric": ["Precision", "Recall", "F1-Score"],
-                    "Value": [precision, recall, f1]
-                }
-                metrics_df = pd.DataFrame(metrics_dict)
-                st.dataframe(metrics_df)
-
-            try:
-
-                model_filename = "clf.pkl"
-                with open(model_filename, "wb") as model_file:
-                    pickle.dump(clf, model_file)
-
-                st.download_button('Download the model', open(model_filename, 'rb').read(), 'clf.pkl')
-
-            except:
-                pass
 
 
+    try :
+        if y.dtype == 'object' or y.nunique() <= 10:
+            st.info('This is a classification problem')
+            modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
+                                           ['', 'Auto modeling', 'Manual modeling'])
 
-    else:
-        st.info('This is a regression problem')
-        modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
-                                       ['', 'Auto modeling', 'Manual modeling'])
+            if modeling_choice == 'Auto modeling':
+                from pycaret.classification import *
+                import xgboost
 
-        if modeling_choice == 'Auto modeling':
-
-            from pycaret.regression import *
-
-            if st.button('Run Modelling'):
                 setup(df, target=target, verbose=False)
                 setup_df = pull()
                 st.info("This is the ML experiment settings")
@@ -310,70 +200,178 @@ if choice == "Data Preparing and Modeling" :
                 with open('best_model.pkl', 'rb') as model_file:
                     st.download_button('Download the model', model_file, 'best_model.pkl')
 
-        if modeling_choice == 'Manual modeling':
+            if modeling_choice == 'Manual modeling':
 
-            algo_type = st.selectbox('Please choose which type of algorithm you want to use',
-                                     ['', 'Linear Regression', 'Ridge', 'SVR', 'Random Forest'])
+                algo_type = st.selectbox('Please choose which type of algorithm you want to use',
+                                         ['', 'Logistic Regression', 'Decision Trees', 'Random Forest', 'SVC',
+                                          'KNN'])
 
-            if algo_type == 'Linear Regression':
-                from sklearn.linear_model import LinearRegression
+                if algo_type == 'Logistic Regression':
+                    from sklearn.linear_model import LogisticRegression
 
-                rg = LinearRegression()
-                rg.fit(X_train, y_train)
-                y_pred = rg.predict(X_test)
+                    clf = LogisticRegression(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            if algo_type == 'Ridge':
-                from sklearn.linear_model import Ridge
+                if algo_type == 'Decision Trees':
+                    from sklearn.tree import DecisionTreeClassifier
 
-                rg = Ridge()
-                rg.fit(X_train, y_train)
-                y_pred = rg.predict(X_test)
+                    clf = DecisionTreeClassifier(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            if algo_type == 'SVR':
-                from sklearn.svm import SVR
+                if algo_type == 'Random Forest':
+                    from sklearn.ensemble import RandomForestClassifier
 
-                rg = SVR()
-                rg.fit(X_train, y_train)
-                y_pred = rg.predict(X_test)
+                    clf = RandomForestClassifier(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            if algo_type == 'Random Forest':
-                from sklearn.ensemble import RandomForestRegressor
+                if algo_type == 'SVC':
+                    from sklearn.svm import SVC
 
-                rg = RandomForestRegressor()
-                rg.fit(X_train, y_train)
-                y_pred = rg.predict(X_test)
+                    clf = SVC(random_state=42)
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-            evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'MAE', 'MSE', 'r2 score'])
+                if algo_type == 'KNN':
+                    from sklearn.neighbors import KNeighborsClassifier
 
-            if evaluation_type == 'MAE':
-                from sklearn.metrics import mean_absolute_error
+                    clf = KNeighborsClassifier()
+                    clf.fit(X_train, y_train)
+                    y_pred = clf.predict(X_test)
 
-                MAE = mean_absolute_error(y_test, y_pred)
-                st.write("Mean absolute error:", MAE)
+                evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'Accuracy', 'Confusion Matrix',
+                                                                                      'Precision, Recall, and F1-score'])
 
-            if evaluation_type == 'MSE':
-                from sklearn.metrics import mean_squared_error
+                if evaluation_type == 'Accuracy':
+                    from sklearn.metrics import accuracy_score
 
-                MSE = mean_squared_error(y_test, y_pred)
-                st.write("Mean squared error:", MSE)
+                    accuracy = accuracy_score(y_test, y_pred)
+                    st.write("Accuracy:", accuracy)
 
-            if evaluation_type == 'r2 score':
-                from sklearn.metrics import r2_score
+                if evaluation_type == 'Confusion Matrix':
+                    from sklearn.metrics import confusion_matrix
 
-                r2 = r2_score(y_test, y_pred)
-                st.write("r2 score:", r2)
+                    cm = confusion_matrix(y_test, y_pred)
+                    st.write("Confusion Matrix:")
+                    st.dataframe(cm)
 
-            try:
+                if evaluation_type == 'Precision, Recall, and F1-score':
+                    from sklearn.metrics import precision_score, recall_score, f1_score
 
-                model_filename = "rg.pkl"
-                with open(model_filename, "wb") as model_file:
-                    pickle.dump(rg, model_file)
+                    precision = precision_score(y_test, y_pred, average='macro')
+                    recall = recall_score(y_test, y_pred, average='macro')
+                    f1 = f1_score(y_test, y_pred, average='macro')
+                    metrics_dict = {
+                        "Metric": ["Precision", "Recall", "F1-Score"],
+                        "Value": [precision, recall, f1]
+                    }
+                    metrics_df = pd.DataFrame(metrics_dict)
+                    st.dataframe(metrics_df)
 
-                st.download_button('Download the model', open(model_filename, 'rb').read(), 'rg.pkl')
+                try:
 
-            except:
-                pass
+                    model_filename = "clf.pkl"
+                    with open(model_filename, "wb") as model_file:
+                        pickle.dump(clf, model_file)
 
+                    st.download_button('Download the model', open(model_filename, 'rb').read(), 'clf.pkl')
+
+                except:
+                    pass
+
+
+
+        else:
+            st.info('This is a regression problem')
+            modeling_choice = st.selectbox('Do you want Auto modeling or you want to choose the model ?',
+                                           ['', 'Auto modeling', 'Manual modeling'])
+
+            if modeling_choice == 'Auto modeling':
+
+                from pycaret.regression import *
+
+                if st.button('Run Modelling'):
+                    setup(df, target=target, verbose=False)
+                    setup_df = pull()
+                    st.info("This is the ML experiment settings")
+                    st.dataframe(setup_df)
+                    best_model = compare_models()
+                    compare_df = pull()
+                    st.info("This is your ML model")
+                    st.dataframe(compare_df)
+                    save_model(best_model, 'best_model')
+
+                    with open('best_model.pkl', 'rb') as model_file:
+                        st.download_button('Download the model', model_file, 'best_model.pkl')
+
+            if modeling_choice == 'Manual modeling':
+
+                algo_type = st.selectbox('Please choose which type of algorithm you want to use',
+                                         ['', 'Linear Regression', 'Ridge', 'SVR', 'Random Forest'])
+
+                if algo_type == 'Linear Regression':
+                    from sklearn.linear_model import LinearRegression
+
+                    rg = LinearRegression()
+                    rg.fit(X_train, y_train)
+                    y_pred = rg.predict(X_test)
+
+                if algo_type == 'Ridge':
+                    from sklearn.linear_model import Ridge
+
+                    rg = Ridge()
+                    rg.fit(X_train, y_train)
+                    y_pred = rg.predict(X_test)
+
+                if algo_type == 'SVR':
+                    from sklearn.svm import SVR
+
+                    rg = SVR()
+                    rg.fit(X_train, y_train)
+                    y_pred = rg.predict(X_test)
+
+                if algo_type == 'Random Forest':
+                    from sklearn.ensemble import RandomForestRegressor
+
+                    rg = RandomForestRegressor()
+                    rg.fit(X_train, y_train)
+                    y_pred = rg.predict(X_test)
+
+                evaluation_type = st.selectbox('Choose type of evaluation metrics ', ['', 'MAE', 'MSE', 'r2 score'])
+
+                if evaluation_type == 'MAE':
+                    from sklearn.metrics import mean_absolute_error
+
+                    MAE = mean_absolute_error(y_test, y_pred)
+                    st.write("Mean absolute error:", MAE)
+
+                if evaluation_type == 'MSE':
+                    from sklearn.metrics import mean_squared_error
+
+                    MSE = mean_squared_error(y_test, y_pred)
+                    st.write("Mean squared error:", MSE)
+
+                if evaluation_type == 'r2 score':
+                    from sklearn.metrics import r2_score
+
+                    r2 = r2_score(y_test, y_pred)
+                    st.write("r2 score:", r2)
+
+                try:
+
+                    model_filename = "rg.pkl"
+                    with open(model_filename, "wb") as model_file:
+                        pickle.dump(rg, model_file)
+
+                    st.download_button('Download the model', open(model_filename, 'rb').read(), 'rg.pkl')
+
+                except:
+                    pass
+
+    except :
+        pass
 
 
 
