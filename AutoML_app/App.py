@@ -185,20 +185,20 @@ if choice == "Data Preparing and Modeling" :
 
             if modeling_choice == 'Auto modeling':
                 from pycaret.classification import *
-                import xgboost
 
-                setup(df, target=target, verbose=False)
-                setup_df = pull()
-                st.info("This is the ML experiment settings")
-                st.dataframe(setup_df)
-                best_model = compare_models()
-                compare_df = pull()
-                st.info("This is your ML model")
-                st.dataframe(compare_df)
-                save_model(best_model, 'best_model')
+                if st.button('Run Modelling'):
+                    setup(df, target=target, verbose=False)
+                    setup_df = pull()
+                    st.info("This is the ML experiment settings")
+                    st.dataframe(setup_df)
+                    best_model = compare_models()
+                    compare_df = pull()
+                    st.info("This is your ML model")
+                    st.dataframe(compare_df)
+                    save_model(best_model, 'best_model')
 
-                with open('best_model.pkl', 'rb') as model_file:
-                    st.download_button('Download the model', model_file, 'best_model.pkl')
+                    with open('best_model.pkl', 'rb') as model_file:
+                        st.download_button('Download the model', model_file, 'best_model.pkl')
 
             if modeling_choice == 'Manual modeling':
 
@@ -293,7 +293,7 @@ if choice == "Data Preparing and Modeling" :
                 from pycaret.regression import *
 
                 if st.button('Run Modelling'):
-                    setup(df, target=target, verbose=False)
+                    setup(df, target=target, verbose=False,use_gpu=True)
                     setup_df = pull()
                     st.info("This is the ML experiment settings")
                     st.dataframe(setup_df)
