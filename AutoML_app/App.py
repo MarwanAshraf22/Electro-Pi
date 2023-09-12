@@ -191,6 +191,7 @@ if choice == "Data Preparing and Modeling" :
             from pycaret.classification import *
 
             analysis_option = st.selectbox("Choose an analysis method:", ['',"Auto Modeling", "Choose Specific Model"])
+
             if analysis_option=='Auto Modeling':
 
                 setup(df, target=target, verbose=False)
@@ -207,7 +208,8 @@ if choice == "Data Preparing and Modeling" :
                 with open('best_model.pkl', 'rb') as model_file:
                     st.download_button('Download the model', model_file, 'best_model.pkl')
 
-            if analysis_option == 'Choose Specific Model':
+            if analysis_option=='Choose Specific Model' :
+
                 model = models().index.tolist()
                 model_choose = st.selectbox("Choose a model for analysis:", model)
 
@@ -220,7 +222,7 @@ if choice == "Data Preparing and Modeling" :
                 model = create_model(model_choose, verbose=False)
                 compare_df = pull()
                 st.info("This is your model scores")
-                st.dataframe(compare_df)
+                st.dataframe(compare_df)            
 
 
 
@@ -232,6 +234,7 @@ if choice == "Data Preparing and Modeling" :
 
             analysis_option = st.selectbox("Choose an analysis method:", ['', "Auto Modeling", "Choose Specific Model"])
             if analysis_option == 'Auto Modeling':
+
                 setup(df, target=target, verbose=False)
                 setup_df = pull()
                 st.info("This is the ML experiment settings")
