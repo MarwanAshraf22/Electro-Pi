@@ -191,7 +191,6 @@ if choice == "Data Preparing and Modeling" :
             from pycaret.classification import *
 
             analysis_option = st.selectbox("Choose an analysis method:", ['',"Auto Modeling", "Choose Specific Model"])
-
             if analysis_option=='Auto Modeling':
 
                 setup(df, target=target, verbose=False)
@@ -208,21 +207,18 @@ if choice == "Data Preparing and Modeling" :
                 with open('best_model.pkl', 'rb') as model_file:
                     st.download_button('Download the model', model_file, 'best_model.pkl')
 
-            if analysis_option=='Choose Specific Model' :
-
-                model = models().index.tolist()
-                model_choose = st.selectbox("Choose a model for analysis:", model)
-
+            if analysis_option == 'Choose Specific Model':
                 setup(df, target=target, verbose=False)
                 setup_df = pull()
                 st.info("This is the ML experiment settings")
                 st.dataframe(setup_df)
-
                 st.error('IT WILL TAKE SOME TIME PLEASE BE PATIENT')
+                model = models().index.tolist()
+                model_choose = st.selectbox("Choose a model for analysis:", model)
                 model = create_model(model_choose, verbose=False)
                 compare_df = pull()
                 st.info("This is your model scores")
-                st.dataframe(compare_df)            
+                st.dataframe(compare_df)
 
 
 
@@ -234,7 +230,6 @@ if choice == "Data Preparing and Modeling" :
 
             analysis_option = st.selectbox("Choose an analysis method:", ['', "Auto Modeling", "Choose Specific Model"])
             if analysis_option == 'Auto Modeling':
-
                 setup(df, target=target, verbose=False)
                 setup_df = pull()
                 st.info("This is the ML experiment settings")
@@ -250,16 +245,13 @@ if choice == "Data Preparing and Modeling" :
                     st.download_button('Download the model', model_file, 'best_model.pkl')
 
             if analysis_option=='Choose Specific Model' :
-
-                model = models().index.tolist()
-                model_choose = st.selectbox("Choose a model for analysis:", model)
-
                 setup(df, target=target, verbose=False)
                 setup_df = pull()
                 st.info("This is the ML experiment settings")
                 st.dataframe(setup_df)
-
                 st.error('IT WILL TAKE SOME TIME PLEASE BE PATIENT')
+                model = models().index.tolist()
+                model_choose = st.selectbox("Choose a model for analysis:", model)
                 model = create_model(model_choose, verbose=False)
                 compare_df = pull()
                 st.info("This is your model scores")
@@ -270,7 +262,7 @@ if choice == "Data Preparing and Modeling" :
 
 
     except :
-            pass
+        pass
 
 
 
