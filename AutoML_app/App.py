@@ -156,20 +156,37 @@ if choice == "Data Preparing and Modeling" :
     columns_to_drop = categorical_columns
     df_encoded = df_encoded.drop(columns=columns_to_drop)
 
-    fill_missing = st.selectbox('How would you like to handle your missing data ?',['','Mean','Median','Mode'])
-    if fill_missing == 'Mean' :
-        df_filled = df_encoded.fillna(df_encoded.mean())
+    fill_missing_categorical = st.selectbox('How would you like to handle your missing categorical data?',
+                                            ['', 'Most Frequent', 'Additional Class'])
+
+    # Assuming df is your DataFrame
+    # If not, replace df with your actual DataFrame variable
+
+    categorical_columns = df_encoded.select_dtypes(include=['object'])
+
+    if fill_missing_categorical == 'Most Frequent':
+        df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna(
+            df_encoded[categorical_columns.columns].mode().iloc[0])
+
+    if fill_missing_categorical == 'Additional Class':
+        df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna('Missing')
+
+
+    fill_missing = st.selectbox('How would you like to handle your missing continous data ?',['','Mean','Median','Mode'])
+    continuous_columns = df_encoded.select_dtypes(include=['float64', 'int64'])
+    if fill_missing == 'Mean':
+        df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].mean())
 
     if fill_missing == 'Median' :
-        df_filled = df_encoded.fillna(df_encoded.median())
+        df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].median())
 
     if fill_missing == 'Mode' :
-        df_filled = df_encoded.fillna(df_encoded.mode().iloc[0])
+        df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].iloc[0])
 
     from sklearn.preprocessing import MinMaxScaler
     try:
-        X = df_filled.drop(columns=target)
-        y = df_filled[target]
+        X = df_encoded.drop(columns=target)
+        y = df_encoded[target]
 
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
