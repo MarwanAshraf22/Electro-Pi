@@ -179,17 +179,20 @@ if choice == "Data Preparing and Modeling" :
             df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna('Missing')
     except :
         pass
+    try :
+        fill_missing = st.selectbox('How would you like to handle your missing continous data ?',['','Mean','Median','Mode'])
+        continuous_columns = df_encoded.select_dtypes(include=['float64', 'int64'])
+        if fill_missing == 'Mean':
+            df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].mean())
 
-    fill_missing = st.selectbox('How would you like to handle your missing continous data ?',['','Mean','Median','Mode'])
-    continuous_columns = df_encoded.select_dtypes(include=['float64', 'int64'])
-    if fill_missing == 'Mean':
-        df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].mean())
+        if fill_missing == 'Median' :
+            df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].median())
 
-    if fill_missing == 'Median' :
-        df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].median())
+        if fill_missing == 'Mode' :
+            df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].iloc[0])
 
-    if fill_missing == 'Mode' :
-        df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].iloc[0])
+    except:
+        pass
 
     if st.button('Show Data after preprocessing') :
         try :
