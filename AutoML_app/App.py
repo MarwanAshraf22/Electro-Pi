@@ -154,12 +154,10 @@ if choice == "Data Preparing and Modeling" :
         pass
 
     categorical_columns = df.select_dtypes(include=['object', 'category'])
-    categorical_columns = [col for col in categorical_columns if col != target]
 
     one_hot_encoded = pd.get_dummies(categorical_columns, drop_first=True)
-    df_encoded = pd.concat([df, one_hot_encoded], axis=1)
-    columns_to_drop = categorical_columns
-    df_encoded = df_encoded.drop(columns=columns_to_drop)
+    df_encoded = pd.concat([df.drop(columns=categorical_columns), one_hot_encoded], axis=1)
+
 
     fill_missing_categorical = st.selectbox('How would you like to handle your missing categorical data?',
                                             ['', 'Most Frequent', 'Additional Class'])
@@ -167,7 +165,6 @@ if choice == "Data Preparing and Modeling" :
     # Assuming df is your DataFrame
     # If not, replace df with your actual DataFrame variable
 
-    categorical_columns = df_encoded.select_dtypes(include=['object'])
     try :
         if fill_missing_categorical == 'Most Frequent':
             df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna(
@@ -189,8 +186,11 @@ if choice == "Data Preparing and Modeling" :
     if fill_missing == 'Mode' :
         df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].iloc[0])
 
-    st.write('Your data after preprocessing',df_encoded)
-
+    if st.button('Show Data after preprocessing') :
+        try :
+            st.write('Your data after preprocessing',df_encoded)
+        except :
+            pass
 
     from sklearn.preprocessing import MinMaxScaler
     try:
@@ -203,10 +203,6 @@ if choice == "Data Preparing and Modeling" :
         scaled_data = mm.fit_transform(X)
         df_scaled = pd.DataFrame(scaled_data, columns=X.columns)
         df_scaled['target'] = y
-
-        from sklearn.preprocessing import LabelEncoder
-
-
 
 
     except:
