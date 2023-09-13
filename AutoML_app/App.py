@@ -147,6 +147,11 @@ if choice == "Data Preparing and Modeling" :
 
     target_choices = [''] + df.columns.tolist()
     target = st.selectbox('Choose your target variable', target_choices)
+    try :
+        lb = LabelEncoder()
+        df[target] = lb.fit_transform(df[target])
+    except :
+        pass
 
     categorical_columns = df.select_dtypes(include=['object', 'category'])
     categorical_columns = [col for col in categorical_columns if col != target]
@@ -163,14 +168,15 @@ if choice == "Data Preparing and Modeling" :
     # If not, replace df with your actual DataFrame variable
 
     categorical_columns = df_encoded.select_dtypes(include=['object'])
+    try :
+        if fill_missing_categorical == 'Most Frequent':
+            df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna(
+                df_encoded[categorical_columns.columns].mode().iloc[0])
 
-    if fill_missing_categorical == 'Most Frequent':
-        df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna(
-            df_encoded[categorical_columns.columns].mode().iloc[0])
-
-    if fill_missing_categorical == 'Additional Class':
-        df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna('Missing')
-
+        if fill_missing_categorical == 'Additional Class':
+            df_encoded[categorical_columns.columns] = df_encoded[categorical_columns.columns].fillna('Missing')
+    except :
+        pass
 
     fill_missing = st.selectbox('How would you like to handle your missing continous data ?',['','Mean','Median','Mode'])
     continuous_columns = df_encoded.select_dtypes(include=['float64', 'int64'])
@@ -182,6 +188,9 @@ if choice == "Data Preparing and Modeling" :
 
     if fill_missing == 'Mode' :
         df_encoded[continuous_columns.columns] = df_encoded[continuous_columns.columns].fillna(df_encoded[continuous_columns.columns].iloc[0])
+
+    st.write('Your data after preprocessing',df_encoded)
+
 
     from sklearn.preprocessing import MinMaxScaler
     try:
@@ -195,8 +204,15 @@ if choice == "Data Preparing and Modeling" :
         df_scaled = pd.DataFrame(scaled_data, columns=X.columns)
         df_scaled['target'] = y
 
+        from sklearn.preprocessing import LabelEncoder
+
+
+
+
     except:
         pass
+
+
 
 
 
