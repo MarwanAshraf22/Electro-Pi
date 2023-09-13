@@ -156,10 +156,13 @@ if choice == "Data Preparing and Modeling" :
             pass
 
     categorical_columns = df.select_dtypes(include=['object', 'category'])
+    try :
 
-    one_hot_encoded = pd.get_dummies(categorical_columns, drop_first=True)
-    df_encoded = pd.concat([df.drop(columns=categorical_columns), one_hot_encoded], axis=1)
+        one_hot_encoded = pd.get_dummies(categorical_columns, drop_first=True)
+        df_encoded = pd.concat([df.drop(columns=categorical_columns), one_hot_encoded], axis=1)
 
+    except :
+        pass
 
     fill_missing_categorical = st.selectbox('How would you like to handle your missing categorical data?',
                                             ['', 'Most Frequent', 'Additional Class'])
