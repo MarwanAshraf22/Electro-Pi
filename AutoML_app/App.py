@@ -147,11 +147,13 @@ if choice == "Data Preparing and Modeling" :
 
     target_choices = [''] + df.columns.tolist()
     target = st.selectbox('Choose your target variable', target_choices)
-    try :
-        lb = LabelEncoder()
-        df[target] = lb.fit_transform(df[target])
-    except :
-        pass
+
+    if df[target].dtype == 'object' or df[target].nunique() <= 10:
+        try :
+            lb = LabelEncoder()
+            df[target] = lb.fit_transform(df[target])
+        except :
+            pass
 
     categorical_columns = df.select_dtypes(include=['object', 'category'])
 
