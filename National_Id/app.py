@@ -29,7 +29,15 @@ def upload_id_card(file):
             df = pytesseract.image_to_data(gray, output_type=Output.DATAFRAME, config=my_config)
             df.dropna(inplace=True)
             df_text = pd.DataFrame(df['text'])
-            st.write(df_text)
+
+            structured_data = {
+
+                "Name": df_text.iloc[0]['text'],
+                "ID Number": df_text.iloc[1]['text'],
+
+            }
+
+            st.write(pd.DataFrame([structured_data]))
 
             boxes = pytesseract.image_to_boxes(img, config=my_config)
             for box in boxes.splitlines():
