@@ -12,6 +12,24 @@ def display_sidebar():
         st.title("National ID Card Recognition")
         st.info("This project is powered by electropi.ai using Tesseract OCR and cv2 to detect text on ID cards")
 
+def extract_information(df_text):
+    names = []
+    ages = []
+    id_numbers = []
+
+    for idx, row in df_text.iterrows():
+        text = row['text'].strip()
+
+        if text.startswith('Name:'):
+            names.append(text[5:].strip())
+        elif text.startswith('Age:'):
+            ages.append(text[4:].strip())
+        elif text.startswith('ID:'):
+            id_numbers.append(text[3:].strip())
+
+    info_df = pd.DataFrame({'Name': names, 'Age': ages, 'ID Number': id_numbers})
+    return info_df
+
 def upload_id_card(file):
     try:
         st.title("Upload Your ID card please in jpg or png format!")
@@ -30,15 +48,6 @@ def upload_id_card(file):
             df.dropna(inplace=True)
             df_text = pd.DataFrame(df['text'])
 
-            structured_data = {
-
-                "Name": df_text.iloc[0]['text'],
-                "ID Number": df_text.iloc[1]['text'],
-
-            }
-
-            st.write(pd.DataFrame([structured_data]))
-
             boxes = pytesseract.image_to_boxes(img, config=my_config)
             for box in boxes.splitlines():
                 box = box.split(' ')
@@ -46,6 +55,11 @@ def upload_id_card(file):
                                          (int(box[3]), height - int(box[4])), (0, 255, 0), 2)
 
             st.image(img_text, 'This is detected text')
+
+            info_df = extract_information(df_text)
+
+            st.write("Extracted Information:")
+            st.dataframe(info_df)
 
         else:
             st.info("Please upload a file in jpg or png format.")
