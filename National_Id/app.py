@@ -3,16 +3,23 @@ from PIL import Image
 import pytesseract
 import pandas as pd
 
-
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def perform_ocr(image):
     text = pytesseract.image_to_string(image)
     lines = text.split('\n')
     non_empty_lines = [line for line in lines if line.strip()]
-    data = {'Text': non_empty_lines}
+    data = {'Name': [], 'Value': []}
+    
+    for line in non_empty_lines:
+        parts = line.split(':')
+        if len(parts) == 2:
+            name, value = parts[0].strip(), parts[1].strip()
+            data['Name'].append(name)
+            data['Value'].append(value)
+            
     df = pd.DataFrame(data)
-    return df.iloc[2:7]  # Select rows 2 to 5 (0-based indexing)
+    return df
 
 def main():
     st.title('Text extractor')
